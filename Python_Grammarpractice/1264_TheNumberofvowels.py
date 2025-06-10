@@ -1,3 +1,5 @@
+results = []
+
 while True :
     Sentence = input()
 
@@ -10,4 +12,7 @@ while True :
         if char in "aeiou" :
            count += 1
 
-    print(count)
+    results.append(count)
+
+for r in results :
+    print(r)
