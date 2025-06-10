@@ -1,5 +1,3 @@
-count = 0
-
 while True :
     Sentence = input()
 
