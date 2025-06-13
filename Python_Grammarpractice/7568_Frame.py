@@ -22,5 +22,5 @@ for i in range(N) :
 #     # x: 사람의 몸무게, y: 사람의 키
 #     x, y = list(int, input().split())
 #     if x >  :
-#        x = \
+#        x =
 #        print()
