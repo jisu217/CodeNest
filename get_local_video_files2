@@ -1,0 +1,156 @@
+import cv2
+import ultralytics import YOLO
+import tensorflow as tf
+import pandas as pd
+import matplotlib as plt
+import numpy as np
+
+#1. 로컬 내 영상 파일 가져오기
+
+def get_local_video_files(num_files=1):
+    """로컬 비디오 파일 선택 (1개 또는 2개)"""
+    print(f"🎬 로컬 비디오 파일 {num_files}개를 선택해주세요")
+    print("지원 형식: .mp4, .avi, .mov, .mkv, .wmv, .flv, .webm")
+
+    video_files = []
+    for i in range(num_files):
+        print(f"\n📁 {i + 1}번째 비디오 파일:")
+        while True:
+            video_path = input(f"비디오 파일 {i + 1} 경로: ").strip().strip('"').strip("'")
+            if not video_path:
+                print("경로를 입력해주세요!")
+                continue
+            if not os.path.exists(video_path):
+                print(f"❌ 파일을 찾을 수 없습니다: {video_path}")
+                continue
+            if not any(video_path.lower().endswith(ext) for ext in ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm']):
+                print("❌ 지원하지 않는 파일 형식입니다.")
+                continue
+            test_cap = cv2.VideoCapture(video_path)
+            if not test_cap.isOpened():
+                print("❌ 비디오 파일을 열 수 없습니다.")
+                continue
+            fps = test_cap.get(cv2.CAP_PROP_FPS)
+            frame_count = int(test_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            width = int(test_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(test_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            duration = frame_count / fps if fps > 0 else 0
+            print(f"✅ 비디오 {i + 1} 정보:")
+            print(f"   파일명: {os.path.basename(video_path)}")
+            print(f"   해상도: {width}x{height}")
+            print(f"   FPS: {fps:.1f}")
+            print(f"   길이: {duration:.1f}초")
+            test_cap.release()
+            video_files.append(video_path)
+            break
+    return video_files
+
+# 1. 감정분석 모델 클래스 설정
+
+class EmotionalAnalyzer:
+    def __init__(self, model_path = None):
+
+        self.emotions = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad',
+                         'surprise']
+        self.emotion_colors = {
+            'angry': (0, 0, 255), #빨간색
+            'disgust': (0, 255, 0),
+            'fear': (255, 0, 255),
+            'happy': (0, 255, 255),
+            'neutral': (128 ,128, 128), #회색
+            'sad': (255, 0, 0),
+            'surprise': (0, 165, 255)
+        }
+
+        # 외부모델 / 정의한 모델 사용 여부에 따른 코드
+        if model_path and os.path.exists(model_path):
+            self.model = load_model(model_path)
+        else:
+            self.model = self.create_default_model()
+
+    def create_default_model(self):
+        model = tf.keras.Sequential([
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(48, 48, 1)),
+            tf.keras.layers.BatchNormalization(), #배치 정규화: 학습을 빠르게 하고 안정되게 하는 기능.
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu'), #feature을 더 깊게 추출
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.MaxPooling2D(2, 2), #2x2 크기의 max pooling > 특성 맵의 크기를 절반으로 줄임
+            tf.keras.layers.Dropout(0, 25), #과적합 방지
+
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
+            tf.keras.layers.BatchNormalization(),  # 배치 정규화: 학습을 빠르게 하고 안정되게 하는 기능.
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),  # feature을 더 깊게 추출
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.MaxPooling2D(2, 2),  # 2x2 크기의 max pooling > 특성 맵의 크기를 절반으로 줄임
+            tf.keras.layers.Dropout(0, 25),  # 과적합 방지
+
+            tf.keras.layers.Flatten(), #위에서 추출된 다차원 벡터를 1차원 벡터로 변환.
+            tf.keras.layers.Dense(512, activation = 'relu'), #512개의 뉴런을 가진 Fully Connected Layer 사용
+            #입력값 * 가중치 + 편향 -> 활성화함수 -> 출력값 :: 이 과정을 512번 평행하게 실행.
+            #합성곱(Flatten이전의 층들)은 국소적인 특징을 뽑는데 강점. 따라서 전체이미지를 보고 판단하기 위해 완전연결층이 필요.
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Dropout(0, 5),
+            tf.keras.layers.Dense(7, activation = 'softmax')
+        ])
+
+        model.compile(
+            optimizer = 'adam', #딥러닝 모델 학습 과정에서 손실 함수의 결과값을 최소화하는 파라미터를 찾기 위해 사용되는 알고리즘
+            loss = 'categorical_crossentropy', #손실함수: 모델의 예측값과 실제값 사이의 차이를 계산하여 모델의 성능을 평가
+            metrics = ['accuracy']
+        )
+
+        return model
+
+
+    #얼굴이미지처리 함수 만들기
+    def preprocess_face(self, face_img):
+        #그레이스케일 변환
+        if len(face_img.shape) == 3:
+            face_imag = cv2.cvtColor(face_img, cv2.COLOR_BAYER_RG2GRAY)
+
+        #크기 조정
+        face_img = cv2.resize(face_img, (48, 48))
+
+        #정규화 >> 안정성 향상을 위해 새용
+        face_img = face_img.astype('float32') / 255.0
+
+        #차원 확장 >> 현재까지 이미지를 흑백으로 해서 shape이 (48, 48)임.
+        #CNN모델(우리가 이미지를 넣을..)은 (height, width, channels) 형태가 들어가야함. 따라서 (48, 48, 1)의 형태로 만들어줌.
+        face_img = np.expand_dims(face_img, axis = -1)
+        face_img = np.expand_dims(face_img, axis = 0)
+
+        return face_img
+
+
+    #감정 예측 함수
+    def predict_emotion(self, face_img):
+        try:
+            #전처리
+            processed_face = self.preprocess_face(face_img)
+
+            #예측
+            predictions = self.model.predict(processed_face, verbose=0)[0]
+
+            #결과 정리
+            emotion_probabilities = {
+                emotion: float(prob) for emotion, prob in zip(self.emotions, predictions)}
+
+            #가장 높은 확률의 감정 반환
+            dominant_emotion = max(emotion_probabilities, key= emotion_probabilities.get)
+            confidence = emotion_probabilities[dominant_emotion]
+
+            return dominant_emotion, confidence, emotion_probabilities
+
+        except Exception as e:
+            return 'neutral', 0.0
+
+
+
+
+
+
+
+
+
+
+
