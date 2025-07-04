@@ -1,0 +1,46 @@
+def create_emotion_chart(self, chart_path):
+        """감정 분포 차트 생성"""
+        # 전체 감정 통계 집계
+        emotion_counts = defaultdict(int)
+
+        for frame_stat in self.frame_stats:
+            for emotion, count in frame_stat['total_emotions'].items():
+                emotion_counts[emotion] += count
+
+        if not emotion_counts:
+            print("📈 감정 데이터가 없어 차트를 생성할 수 없습니다.")
+            return
+
+        # 차트 생성
+        plt.figure(figsize=(12, 8))
+
+        # 서브플롯 1: 전체 감정 분포
+        plt.subplot(2, 2, 1)
+        emotions = list(emotion_counts.keys())
+        counts = list(emotion_counts.values())
+        colors = [self.emotion_analyzer.emotion_colors[emotion] for emotion in emotions]
+        colors = [(r / 255, g / 255, b / 255) for b, g, r in colors]  # BGR to RGB
+
+        plt.pie(counts, labels=emotions, colors=colors, autopct='%1.1f%%')
+        plt.title('전체 감정 분포')
+
+        # 서브플롯 2: 감정별 막대 그래프
+        plt.subplot(2, 2, 2)
+        plt.bar(emotions, counts, color=colors)
+        plt.title('감정별 탐지 횟수')
+        plt.xticks(rotation=45)
+
+        # 서브플롯 3: 시간별 감정 변화
+        plt.subplot(2, 1, 2)
+        frame_emotions = []
+        for frame_stat in self.frame_stats:
+            frame_emotions.append(sum(frame_stat['total_emotions'].values()))
+
+        plt.plot(frame_emotions)
+        plt.title('시간별 감정 탐지 수')
+        plt.xlabel('프레임 번호')
+        plt.ylabel('탐지된 감정 수')
+
+        plt.tight_layout()
+        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+        plt.close()
