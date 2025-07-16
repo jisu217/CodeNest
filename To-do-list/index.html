@@ -1,0 +1,26 @@
+<!DOCTYPE html> <!-- html 선언 --> 
+<html lang="ko"> <!-- 언어 속성 -->
+  <head> <!-- 유저에게 보이지 않는 정보 -->
+    <meta charset="utf-8" /> <!-- meta: 추가 정보 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- 모바일 화면 크기에 맞춘 반응형 -->
+    <link rel="stylesheet" href="style.css" /> <!-- css 파일 html 연결 -->
+    <title> <!-- 브라우저 탭 페이지 제목 --> 
+      할일 목록
+    </title>
+  </head>  
+  <body> <!-- 유저에게 보이는 정보 -->
+    <div class="container">
+      <div class="input-container">
+        <input id="input" placeholder="예) 코딩공부하기" />
+        <button id="add-button">추가</button>
+      </div>
+      <div class="list-container">
+        <h1>할 일 목록</h1>
+        <ul id="list">
+          <li class="list-item">코딩팍 팔로우하기</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+  <script src="app.js"></script>
+</html>
