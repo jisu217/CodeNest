@@ -1,0 +1,81 @@
+def print_basic_stats(self):
+        """기본 통계 출력"""
+        total_detections = 0
+        emotion_counts = defaultdict(int)
+
+        for frame_stat in self.frame_stats:
+            for person in frame_stat['persons']:
+                for face in person['faces']:
+                    total_detections += 1
+                    emotion_counts[face['emotion']] += 1
+
+        print(f"📊 기본 통계:")
+        print(f"   총 탐지 수: {total_detections}")
+        if emotion_counts:
+            print(f"   감정별 분포:")
+            for emotion, count in emotion_counts.items():
+                percentage = (count / total_detections) * 100 if total_detections > 0 else 0
+                print(f"     {emotion}: {count}회 ({percentage:.1f}%)")
+
+    def save_analysis_results(self, input_path, output_path):
+        """분석 결과 저장"""
+        base_name = os.path.splitext(os.path.basename(input_path))[0]
+        timestamp = int(time.time())
+
+        # JSON 직렬화를 위한 데이터 변환
+        serializable_stats = self.convert_to_serializable(self.frame_stats)
+
+        # JSON 상세 결과
+        json_path = f"emotion_analysis_{base_name}_{timestamp}.json"
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(serializable_stats, f, indent=2, ensure_ascii=False)
+        print(f"📄 상세 결과 저장: {json_path}")
+
+        # CSV 요약 통계
+        csv_path = f"emotion_summary_{base_name}_{timestamp}.csv"
+        self.create_summary_csv(csv_path)
+        print(f"📊 요약 통계 저장: {csv_path}")
+
+        # 시각화 차트
+        chart_path = f"emotion_chart_{base_name}_{timestamp}.png"
+        self.create_emotion_chart(chart_path)
+        print(f"📈 감정 차트 저장: {chart_path}")
+
+    def convert_to_serializable(self, data):
+        """NumPy 타입을 JSON 직렬화 가능한 타입으로 변환"""
+        if isinstance(data, dict):
+            return {key: self.convert_to_serializable(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.convert_to_serializable(item) for item in data]
+        elif isinstance(data, np.integer):
+            return int(data)
+        elif isinstance(data, np.floating):
+            return float(data)
+        elif isinstance(data, np.ndarray):
+            return data.tolist()
+        else:
+            return data
+
+    def create_summary_csv(self, csv_path):
+        """요약 통계 CSV 생성"""
+        summary_data = []
+
+        for frame_stat in self.frame_stats:
+            for person in frame_stat['persons']:
+                for face in person['faces']:
+                    summary_data.append({
+                        'frame_number': int(frame_stat['frame_number']),
+                        'person_id': int(person['person_id']),
+                        'emotion': str(face['emotion']),
+                        'confidence': float(face['confidence']),
+                        'yolo_confidence': float(person['yolo_confidence'])
+                    })
+
+        if summary_data:  # 데이터가 있는 경우만 저장
+            df = pd.DataFrame(summary_data)
+            df.to_csv(csv_path, index=False, encoding='utf-8')
+        else:
+            # 빈 CSV 파일 생성
+            df = pd.DataFrame(columns=['frame_number', 'person_id', 'emotion', 'confidence', 'yolo_confidence'])
+            df.to_csv(csv_path, index=False, encoding='utf-8')
+            print("⚠️ 감정 데이터가 없어 빈 CSV 파일을 생성했습니다.")

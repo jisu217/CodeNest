@@ -1,0 +1,37 @@
+def. get_local_video_files(num_files=1):
+    """로컬 비디오 파일 선택 (1개 또는 2개)"""
+    print(f"🎬 로컬 비디오 파일 {num_files}개를 선택해주세요")
+    print("지원 형식: .mp4, .avi, .mov, .mkv, .wmv, .flv, .webm")
+
+    video_files = []
+    for i in range(num_files):
+        print(f"\n📁 {i + 1}번째 비디오 파일:")
+        while True:
+            video_path = input(f"비디오 파일 {i + 1} 경로: ").strip().strip('"').strip("'")
+            if not video_path:
+                print("경로를 입력해주세요!")
+                continue
+            if not os.path.exists(video_path):
+                print(f"❌ 파일을 찾을 수 없습니다: {video_path}")
+                continue
+            if not any(video_path.lower().endswith(ext) for ext in ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm']):
+                print("❌ 지원하지 않는 파일 형식입니다.")
+                continue
+            test_cap = cv2.VideoCapture(video_path)
+            if not test_cap.isOpened():
+                print("❌ 비디오 파일을 열 수 없습니다.")
+                continue
+            fps = test_cap.get(cv2.CAP_PROP_FPS)
+            frame_count = int(test_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            width = int(test_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(test_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            duration = frame_count / fps if fps > 0 else 0
+            print(f"✅ 비디오 {i + 1} 정보:")
+            print(f"   파일명: {os.path.basename(video_path)}")
+            print(f"   해상도: {width}x{height}")
+            print(f"   FPS: {fps:.1f}")
+            print(f"   길이: {duration:.1f}초")
+            test_cap.release()
+            video_files.append(video_path)
+            break
+    return video_files
