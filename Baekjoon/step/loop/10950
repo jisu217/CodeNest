@@ -1,0 +1,7 @@
+T = int(input()) # 테스트의 개수
+i = 0
+
+while i <= T:
+    A, B = map(int, input().split())
+    print(A + B)
+    i += 1
