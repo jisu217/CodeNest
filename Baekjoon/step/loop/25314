@@ -1,0 +1,7 @@
+N = int(input()) 
+coding = 0
+
+coding = N // 4
+print("long " * coding + "int")
+
+     
