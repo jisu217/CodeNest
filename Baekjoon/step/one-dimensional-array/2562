@@ -1,0 +1,11 @@
+num = []  # 숫자를 저장할 리스트
+
+for i in range(9):  # 9개의 자연수 입력
+    n = int(input())
+    num.append(n)
+
+max_value = max(num) # 최댓값
+max_index = num.index(max_value) + 1  # 최댓값의 위치 
+
+print(max_value)  # 첫째 줄: 최댓값
+print(max_index)  # 둘째 줄: 몇 번째 수인지
