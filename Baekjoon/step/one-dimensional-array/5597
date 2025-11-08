@@ -1,0 +1,10 @@
+check_list = [0] * 30 # 학생 명부
+
+for i in range(28):
+  n = int(input()) # 출석번호
+  check_list[n - 1] = 1
+
+for i in range(30):
+    if check_list[i] == 0:
+        print(i + 1)
+

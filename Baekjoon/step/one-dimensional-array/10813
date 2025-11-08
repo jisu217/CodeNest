@@ -1,0 +1,15 @@
+N, M = map(int, input().split()) # N: 바구니 개수, M: 번
+
+list_basket = [] # 바구니 리스트
+for i in range(1, N + 1):
+    list_basket.append(i)
+
+temp = 0
+
+for _ in range(M):
+    i, j = map(int, input().split()) # i: i번 바구니, j: j번 바구니
+    temp = list_basket[i-1]
+    list_basket[i-1] = list_basket[j-1]
+    list_basket[j-1] = temp
+
+print(*list_basket) 
