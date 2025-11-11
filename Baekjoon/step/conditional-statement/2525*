@@ -1,0 +1,10 @@
+A, B = map(int, input().split())  # 시, 분
+timer = int(input())  # 요리하는데 필요한 시간
+
+B += timer 
+A += B // 60 
+
+B = B % 60 #*
+A = A % 24 #*
+
+print(A, B)

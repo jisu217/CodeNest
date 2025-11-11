@@ -1,0 +1,13 @@
+number1, number2, number3 = map(int, input().split()) 
+
+if number1 == number2 == number3:
+   print(10000 + number1 * 1000)
+
+elif number1 == number2 or number1 == number3:
+     print(1000 + number1 * 100)
+     
+elif number2 == number3:
+     print(1000 + number2 * 100)
+
+else:
+    print(max(number1, number2, number3) * 100)
