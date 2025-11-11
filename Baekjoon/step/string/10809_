@@ -1,8 +1,0 @@
-S = input() # S: 단어
-
-for english in range(26):
-    if english == S[english]: 
-        print(S[english - 1]) 
-    else:
-        print(-1)
-        
