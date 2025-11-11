@@ -1,0 +1,4 @@
+S = input() # S: 단어
+i = int(input()) # i: 정수
+
+print(S[i-1]) # 단어의 i번째 글자 출력

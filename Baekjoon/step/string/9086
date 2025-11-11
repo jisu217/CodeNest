@@ -1,0 +1,6 @@
+T = int(input()) # T: 테스트 케이스 개수
+
+for i in range(T):
+    word = input() # word: 문자열
+    print(word[0] + word[-1]) # 첫 글자와 마지막 글자 출력
+

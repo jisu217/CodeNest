@@ -1,0 +1,11 @@
+T = int(input()) # T: 테스트 케이스 개수
+
+for i in range(T):
+    R, S = input().split() # R: 반복 횟수, S: 문자열
+    R = int(R)
+    result = '' 
+
+    for j in S:
+        result += j * R 
+    
+    print(result)

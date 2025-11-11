@@ -1,0 +1,2 @@
+word = input() # 단어
+print(len(word)) # 단어의 길이 출력 

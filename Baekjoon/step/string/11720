@@ -1,0 +1,8 @@
+N = int(input()) # 숫자의 개수
+numbers = input() # 숫자 문자열
+total_numbers = 0 
+
+for i in range(N):
+    total_numbers += int(numbers[i])
+
+print(total_numbers)

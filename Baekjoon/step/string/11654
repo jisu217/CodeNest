@@ -1,0 +1,2 @@
+char = input()  # 문자 입력
+print(ord(char))  # 아스키 코드 출력
