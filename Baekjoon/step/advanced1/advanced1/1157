@@ -1,0 +1,19 @@
+word = input().upper()
+word_list = []
+
+for i in word:
+    word_list.append(i)
+
+max_count = 0
+
+for i in set(word_list):
+    count = word_list.count(i)
+    if count > max_count:
+       max_count = count
+       result = i
+    elif count == max_count:
+         result = '?'
+     
+print(result) 
+ 
+ 

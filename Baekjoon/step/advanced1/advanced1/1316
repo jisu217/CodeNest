@@ -1,0 +1,11 @@
+N = int(input())
+result = 0
+
+for i in range(N):
+    word = input()
+    
+    new_word = set(word)
+    if word == new_word:
+       result += 1
+
+    print(result)
