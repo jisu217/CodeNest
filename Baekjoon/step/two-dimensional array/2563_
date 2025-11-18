@@ -1,5 +1,0 @@
-paper = int(input()) # 색종이의 수
-
-for i in range(paper):
-    x, y = map(int, input().split()) 
-    
