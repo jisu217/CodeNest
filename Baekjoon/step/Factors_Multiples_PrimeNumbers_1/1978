@@ -1,0 +1,17 @@
+N = int(input())
+numbers = list(map(int, input().split()))
+count = 0
+
+for i in range(N):
+    num = numbers[i]
+
+    if num < 2:
+       return False
+
+    if num == 2:
+       count += 1
+
+    if num % 2 == 0:
+       count += 1
+
+print(count)
