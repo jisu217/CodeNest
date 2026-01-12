@@ -1,17 +1,16 @@
 while True:
-      numbers = int(input())
-      if numbers == -1:
-         break
+    numbers = int(input())
 
-      divisors = []
-      total = 0
+    if numbers == -1:
+        break
 
-      for i in range(1, numbers):
-          if numbers % i == 0:
-             divisors.append(i)
-             total += i
+    divisors = []
 
-      if total == numbers:
-         print(f"{numbers} = " + " + ".join(map(str, divisors)))
-      else:
-         print(f"{numbers} is NOT perfect")
+    for i in range(1, numbers):
+        if numbers % i == 0:
+           divisors.append(i)
+
+    if sum(divisors) == numbers:
+        print(f"{numbers} = " + " + ".join(map(str, divisors)))
+    else:
+        print(f"{numbers} is NOT perfect.")
